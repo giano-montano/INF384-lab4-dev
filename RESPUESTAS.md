@@ -1,33 +1,44 @@
 # Respuestas · Laboratorio 4
-Alumno: [código]
-Presupuesto: [ ] min  Métrica DORA: [ ]
+
+Alumno: 20212662
+Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ## Parte 1 · Diagnóstico
+
 ### Defecto 1
+
 - Job y etapa:
 - Problema que causa en el pipeline:
 - Link al commit:
 - Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
+
 ### Defecto 2
+
 - Job y etapa:
 - Problema que causa en el pipeline:
 - Link al commit:
 - Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
+
 ### Defecto 3
+
 - Job y etapa:
 - Problema que causa en el pipeline:
 - Link al commit:
 - Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
+
 ### Defecto 4
+
 - Job y etapa:
 - Problema que causa en el pipeline:
 - Link al commit:
 - Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
+
 ### Defecto 5
+
 - Job y etapa:
 - Problema que causa en el pipeline:
 - Link al commit:
@@ -35,6 +46,7 @@ Presupuesto: [ ] min  Métrica DORA: [ ]
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ## Parte 2 · Implementación
+
 - Link al run en verde en main:
 - Link al pull request:
 - Defecto de la aplicación introducido (archivo y descripción):
@@ -42,20 +54,21 @@ Presupuesto: [ ] min  Métrica DORA: [ ]
 - Link al run fallido:
 
 ## Parte 3 · Decisión bajo restricción
+
 Link al run medido:
 
-| Job | Duración (min:seg) |
-|---|---|
-| unit | |
-| integration | |
-| sast | |
-| sca | |
-| build-push | |
-| deploy | |
-| smoke | |
-| e2e | |
-| load | |
-| **Total** | |
+| Job         | Duración (min:seg) |
+| ----------- | ------------------ |
+| unit        |                    |
+| integration |                    |
+| sast        |                    |
+| sca         |                    |
+| build-push  |                    |
+| deploy      |                    |
+| smoke       |                    |
+| e2e         |                    |
+| load        |                    |
+| **Total**   |                    |
 
 Resultado de load en ese run:
 | Métrica | Valor |
@@ -84,4 +97,5 @@ Riesgo aceptado (defecto de la aplicación concreto y efecto en la métrica DORA
 Decisión sobre sast (se queda / se mueve a otra etapa o evento / informativo) y razón:
 
 ## Declaración de uso de IA
+
 Herramientas usadas y para qué:
