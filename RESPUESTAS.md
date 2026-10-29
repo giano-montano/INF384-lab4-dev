@@ -23,10 +23,10 @@ Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ### Defecto 3
 
-- Job y etapa:
-- Problema que causa en el pipeline:
+- Job y etapa: e2e, post-deploy.
+- Problema que causa en el pipeline: El job instala Chromium y sus dependencias, y los tests solicitan una página de navegador para comprobar una API HTTP; sin embargo solo leen el JSON de la respuesta. Esto agrega tiempo de instalación y ejecución sin aprovechar naveador.
 - Link al commit:
-- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
+- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests): modificar tests, eliminar y ajustar configuración.
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ### Defecto 4
@@ -99,3 +99,4 @@ Decisión sobre sast (se queda / se mueve a otra etapa o evento / informativo) y
 ## Declaración de uso de IA
 
 Herramientas usadas y para qué:
+Codex, para pensar mejor (guía de dónde podrían estar los defectos) y ayudas en sintaxis y obtención de evidencias.

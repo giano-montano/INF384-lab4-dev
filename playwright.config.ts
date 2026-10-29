@@ -1,14 +1,13 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: 'test/e2e',
+  testDir: "test/e2e",
   timeout: 30_000,
   retries: 0,
   workers: 1,
-  reporter: [['list']],
+  reporter: [["list"]],
   use: {
     baseURL: process.env.BASE_URL,
-    extraHTTPHeaders: { accept: 'application/json' },
+    extraHTTPHeaders: { accept: "application/json" },
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
