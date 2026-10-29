@@ -31,18 +31,18 @@ Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ### Defecto 4
 
-- Job y etapa:
-- Problema que causa en el pipeline:
+- Job y etapa: integration, pre-build
+- Problema que causa en el pipeline: Falta de idempotencia y aislamiento en los tests: tienen dependencias en el estado dejado por otros tests; por lo que pueden fallar incluso aunque la aplicación funcione bien.
 - Link al commit:
-- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
+- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests): modificar tests
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ### Defecto 5
 
-- Job y etapa:
-- Problema que causa en el pipeline:
+- Job y etapa: load, post-deploy
+- Problema que causa en el pipeline: La prueba load es laxa en lo que considera aceptable: un 400 con un cuerpo que indique un problema inesperado puede escaparse (algo distinto a saldo insuficiente). Esto puede ocultar errores funcionales bajo carga.
 - Link al commit:
-- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
+- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests): modificar tests
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ## Parte 2 · Implementación
@@ -99,4 +99,4 @@ Decisión sobre sast (se queda / se mueve a otra etapa o evento / informativo) y
 ## Declaración de uso de IA
 
 Herramientas usadas y para qué:
-Codex, para pensar mejor (guía de dónde podrían estar los defectos) y ayudas en sintaxis y obtención de evidencias.
+Codex, para pensar mejor (guía de dónde podrían estar los defectos), ayudas en completar código (sintaxis) y obtención de evidencias.
