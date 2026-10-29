@@ -78,48 +78,77 @@ Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ## Parte 3 · Decisión bajo restricción
 
-Link al run medido:
+Link al run medido: https://github.com/giano-montano/INF384-lab4-dev/actions/runs/40969714654 (el run en verde de la Parte 2).
+
+Duraciones calculadas como completed_at menos started_at de cada job, consultadas en la API de GitHub Actions. La duración del laboratorio es la suma de los jobs, aunque algunos se ejecuten en paralelo.
 
 | Job         | Duración (min:seg) |
 | ----------- | ------------------ |
-| unit        |                    |
-| integration |                    |
-| sast        |                    |
-| sca         |                    |
-| build-push  |                    |
-| deploy      |                    |
-| smoke       |                    |
-| e2e         |                    |
-| load        |                    |
-| **Total**   |                    |
+| unit        | 00:14              |
+| integration | 00:10              |
+| sast        | 00:18              |
+| sca         | 00:21              |
+| build-push  | 00:38              |
+| deploy      | 00:19              |
+| smoke       | 00:11              |
+| e2e         | 00:17              |
+| load        | 12:12              |
+| **Total**   | **14:40**          |
 
 Resultado de load en ese run:
+
 | Métrica | Valor |
 |---|---|
-| p90 | |
-| p95 | |
-| Máximo | |
-| Tasa de error | |
-| Requests por segundo | |
+| p90 | 66,88 ms |
+| p95 | 69,07 ms |
+| Máximo | 332,84 ms |
+| Tasa de error HTTP según k6 | 0,00 % (0 de 35 254) |
+| Requests por segundo | 48,925106 req/s |
+
+Fuente: [resumen final de k6](https://github.com/giano-montano/INF384-lab4-dev/actions/runs/40969714654/job/123783755983). Se completaron 17 627 iteraciones y 35 254 requests, con el 100 % de los checks aprobados. La métrica http_req_failed considera esperados los estados 200 y 400; el check de transferencia distingue si el contenido del 400 corresponde a saldo insuficiente.
 
 Conclusión sobre el comportamiento bajo carga:
 
+En esta ejecución, con una meseta de 30 usuarios virtuales, el sistema sostuvo aproximadamente 48,93 requests/s sin errores HTTP inesperados ni checks fallidos. El 95 % de las duraciones HTTP medidas quedó en aproximadamente 69,07 ms o menos, cercano al p90 de 66,88 ms. El máximo de 332,84 ms muestra que hubo respuestas aisladas más lentas, aunque el p95 se mantuvo muy por debajo del umbral configurado entonces (500 ms). Estos datos describen esta carga y esta ejecución; no establecen la capacidad máxima del servicio ni garantizan su comportamiento ante más usuarios o durante un mes de operación.
+
 SLO propuesto (percentil, valor, ventana) y justificación:
+
+Objetivo de validación en CI: p95 de http_req_duration menor a 200 ms, calculado sobre todos los requests de cada ejecución completa de load. Tras el ajuste, la ventana de cada corrida es de aproximadamente 7 minutos: 1 minuto de subida, 5 minutos constantes con 30 usuarios virtuales y 1 minuto de bajada. Incluye las llamadas GET /saldo y POST /transferir, sin separar percentiles por endpoint.
+
+El valor de 200 ms es aproximadamente 2,9 veces el p95 observado (69,07 ms), por lo que deja margen para variaciones entre ejecuciones, pero es más exigente que los 500 ms originales. El máximo observado de 332,84 ms no contradice este objetivo: un p95 no exige que todos los requests terminen antes de 200 ms. Se configura SLO_P95: 200 en ci.yml; el script lo aplica mediante p(95)<200. El margen propuesto debe comprobarse en el siguiente run y no permite inferir por sí solo el comportamiento en producción.
 
 SLA propuesto y diferencia con el SLO:
 
+Como compromiso propuesto para clientes, p95 de latencia HTTP menor a 300 ms durante cada mes calendario, medido sobre requests válidos del tráfico real de producción, con un crédito del 5 % de la cuota mensual si se incumple. Es una propuesta de acuerdo para el caso, no un compromiso ya acreditado por las mediciones del laboratorio.
+
+El SLO es el objetivo interno que usamos para validar cambios en CI. El SLA es un compromiso externo con una ventana de medición definida y una consecuencia por incumplimiento. Se propone un valor externo menos exigente (300 ms frente a 200 ms) para conservar margen operativo antes de incumplir el acuerdo; además, el SLA se evalúa durante un mes de tráfico real y el SLO de este pipeline durante una carga sintética de 7 minutos. Su cumplimiento mensual requeriría medición continua en producción y no puede demostrarse con este único run.
+
 Cambios para cumplir el presupuesto:
+
 | Cambio | Job | Minutos recuperados |
 |---|---|---|
+| Reducir la etapa de carga constante de 10 a 5 minutos, manteniendo 30 usuarios virtuales y las rampas de 1 minuto | load | 5:00 estimados; pendiente medir la diferencia real entre jobs |
+| Ajustar SLO_P95 de 500 a 200 ms | load | 0:00 previstos; aumenta la exigencia de la validación, no es la fuente del ahorro |
 
-Total resultante: [ ] min
-Link al run en main con los cambios:
+La duración inicial suma 880 s. Si los demás tiempos se mantienen, reducir la meseta en 300 s deja 580 s, es decir, 9:40. Esto daría 1:20 de margen frente al presupuesto de 11:00. La meseta conserva 5 minutos, por encima del mínimo de 4. load sigue ejecutándose en cada run de main, con su threshold de latencia y los checks funcionales; el job deploy se conserva.
+
+Total resultante observado: PENDIENTE del nuevo run de main. La estimación de 9:40 no sustituye esta medición.
+Link al run en main con los cambios: PENDIENTE de commit y push por el alumno.
+
+Al terminar ese run se sumarán nuevamente las duraciones de todos los jobs y se registrará el ahorro real de load respecto de 12:12, además del total observado y el enlace. El objetivo es total <= 11:00.
 
 Riesgo aceptado (defecto de la aplicación concreto y efecto en la métrica DORA asignada):
 
+Acepto reducir la capacidad de detectar defectos que requieren carga prolongada para manifestarse. Un ejemplo concreto sería una regresión en src/db.js que retenga objetos de cada transferencia en una colección global y provoque una fuga de memoria. Si bajo esta carga los errores 500 por agotamiento de memoria aparecen recién después de 8 minutos constantes, la meseta original de 10 minutos podría detectarlos y la nueva de 5 minutos dejaría de detectarlos durante este run. Este es un defecto hipotético aceptado como riesgo, no un fallo observado en el código actual.
+
+Dirección esperada de la métrica asignada, change failure rate: sube ante ese tipo de regresión que escape del pipeline, porque una mayor proporción de despliegues podría requerir rollback o una corrección urgente al fallar después en operación. No se afirma que el CFR ya haya aumentado ni se calcula un porcentaje sin datos de despliegues e incidentes. Se mantienen unit, integration, SAST, SCA, smoke, E2E y la carga de 5 minutos para conservar las demás verificaciones dentro del presupuesto.
+
 Decisión sobre sast (se queda / se mueve a otra etapa o evento / informativo) y razón:
 
+Se queda como validación bloqueante en pre-build, con las reglas y severidad ERROR actuales. Su job costó 18 s (0,30 minutos), aproximadamente el 2,7 % del presupuesto de 11 minutos. El ahorro estimado al acortar load permite conservarlo: la estimación de 9:40 ya incluye esos 18 s.
+
+Mantener SAST antes de build-push permite detener patrones de código inseguros antes de desplegar. Frente a eliminarlo o dejarlo como informativo, se espera reducir el riesgo de que lleguen a operación cambios que requieran una corrección urgente, contribuyendo a contener el change failure rate. Conservarlo no implica una mejora de CFR medida respecto del pipeline actual, porque su comportamiento se mantiene. Moverlo después de deploy permitiría detectar esos hallazgos más tarde; para este presupuesto, el ahorro de 18 s no justifica aceptar ese riesgo adicional.
 ## Declaración de uso de IA
 
 Herramientas usadas y para qué:
-Codex, para guiar la identificación de defectos, completar las correcciones de pruebas de API, integración y carga, ejecutar comprobaciones locales, consultar logs de Actions y redactar evidencias. También se utilizó para preparar la rama y el PR con el defecto intencional de la Parte 2 y verificar que el pipeline lo detectara. Los cambios se revisaron durante el trabajo del laboratorio.
+Codex, para guiar la identificación de defectos, completar las correcciones de pruebas de API, integración y carga, ejecutar comprobaciones locales, consultar logs de Actions y redactar evidencias. También se utilizó para preparar la rama y el PR con el defecto intencional de la Parte 2 y verificar que el pipeline lo detectara. En la Parte 3 ayudó a registrar duraciones y métricas, proponer el SLO y SLA, ajustar la duración de carga y redactar el riesgo aceptado y la decisión sobre SAST. Los cambios se revisaron durante el trabajo del laboratorio.

@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check, sleep } from 'k6';
 
 const BASE = (__ENV.BASE_URL || '').replace(/\/$/, '');
-const SLO_P95 = Number(__ENV.SLO_P95 || 500);
+const SLO_P95 = Number(__ENV.SLO_P95 || 200);
 const USUARIOS = ['ana', 'beto', 'carla', 'diego', 'elena'];
 
 http.setResponseCallback(http.expectedStatuses(200, 400));
@@ -10,7 +10,7 @@ http.setResponseCallback(http.expectedStatuses(200, 400));
 export const options = {
   stages: [
     { duration: '1m', target: 30 },
-    { duration: '10m', target: 30 },
+    { duration: '5m', target: 30 },
     { duration: '1m', target: 0 },
   ],
   thresholds: {
