@@ -34,7 +34,28 @@ export default function () {
     JSON.stringify({ origen, destino, monto: 1 }),
     { headers: { 'content-type': 'application/json' }, tags: { endpoint: 'transferir' } },
   );
-  check(t, { 'transferir 200 o 400': (r) => r.status === 200 || r.status === 400 });
+  check(t, {
+    'transferir devuelve un resultado valido': (r) => {
+      let cuerpo;
+      try {
+        cuerpo = r.json();
+      } catch {
+        return false;
+      }
+      if (!cuerpo || typeof cuerpo !== 'object' || Array.isArray(cuerpo)) {
+        return false;
+      }
+      if (r.status === 400) {
+        return cuerpo.error === 'saldo insuficiente';
+      }
+      return r.status === 200
+        && cuerpo.origen === origen
+        && cuerpo.destino === destino
+        && cuerpo.monto === 1
+        && Number.isInteger(cuerpo.id) && cuerpo.id > 0
+        && Number.isFinite(cuerpo.saldoOrigen) && cuerpo.saldoOrigen >= 0;
+    },
+  });
 
   const s = http.get(`${BASE}/saldo/${origen}`, { tags: { endpoint: 'saldo' } });
   check(s, { 'saldo 200': (r) => r.status === 200 });
