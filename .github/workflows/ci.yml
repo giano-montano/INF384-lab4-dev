@@ -2,10 +2,10 @@ name: ci
 
 on:
   pull_request:
-    paths-ignore: ['**.md']
+    paths-ignore: ["**.md"]
   push:
     branches: [main]
-    paths-ignore: ['**.md']
+    paths-ignore: ["**.md"]
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,6 @@ env:
   SLO_P95: 500
 
 jobs:
-
   unit:
     runs-on: ubuntu-24.04
     steps:
@@ -25,7 +24,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: "20"
           cache: npm
 
       - run: npm ci
@@ -41,7 +40,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: "20"
           cache: npm
 
       - run: npm ci
@@ -58,7 +57,7 @@ jobs:
 
       - name: Semgrep
         env:
-          SEMGREP_SEND_METRICS: 'off'
+          SEMGREP_SEND_METRICS: "off"
         run: |
           semgrep scan \
             --config p/nodejs \
@@ -230,7 +229,7 @@ jobs:
             --output text
 
   smoke:
-    needs: build-push
+    needs: deploy
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
@@ -269,7 +268,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: "20"
           cache: npm
 
       - run: npm ci

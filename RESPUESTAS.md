@@ -7,10 +7,10 @@ Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ### Defecto 1
 
-- Job y etapa:
-- Problema que causa en el pipeline:
+- Job y etapa: smoke y deploy
+- Problema que causa en el pipeline: No asegurar que la prueba smoke se realiza tras haberse desplegado la aplicación
 - Link al commit:
-- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
+- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests): mover de etapa o ajustar configuración
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ### Defecto 2
