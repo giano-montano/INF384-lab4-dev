@@ -15,10 +15,10 @@ Presupuesto: [11] min Métrica DORA: [change failure rate]
 
 ### Defecto 2
 
-- Job y etapa:
-- Problema que causa en el pipeline:
+- Job y etapa: Smoke, post-deploy
+- Problema que causa en el pipeline: El smoke se salta la comprobación de identidad de commit, es decir, podría probarse un commit cuando ya se actualizó e hizo otro commit que cambió la versión que se prueba. Esto es porque no recibe EXPECTED_COMMIT.
 - Link al commit:
-- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests):
+- Corrección (una o más: mover de etapa / dejar como informativo / eliminar / ajustar configuración / modificar tests): ajustar configuración
 - Evidencia (dato observado, con link al run o fragmento de la salida local):
 
 ### Defecto 3
