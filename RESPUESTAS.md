@@ -1,7 +1,7 @@
 # Respuestas · Laboratorio 4
 
 Alumno: 20212662
-Presupuesto: [11] min Métrica DORA: [change failure rate]
+Presupuesto: 11 min. Métrica DORA: change failure rate.
 
 ## Parte 1 · Diagnóstico
 
@@ -115,7 +115,7 @@ SLO propuesto (percentil, valor, ventana) y justificación:
 
 Objetivo de validación en CI: p95 de http_req_duration menor a 200 ms, calculado sobre todos los requests de cada ejecución completa de load. Tras el ajuste, la ventana de cada corrida es de aproximadamente 7 minutos: 1 minuto de subida, 5 minutos constantes con 30 usuarios virtuales y 1 minuto de bajada. Incluye las llamadas GET /saldo y POST /transferir, sin separar percentiles por endpoint.
 
-El valor de 200 ms es aproximadamente 2,9 veces el p95 observado (69,07 ms), por lo que deja margen para variaciones entre ejecuciones, pero es más exigente que los 500 ms originales. El máximo observado de 332,84 ms no contradice este objetivo: un p95 no exige que todos los requests terminen antes de 200 ms. Se configura SLO_P95: 200 en ci.yml; el script lo aplica mediante p(95)<200. El margen propuesto debe comprobarse en el siguiente run y no permite inferir por sí solo el comportamiento en producción.
+El valor de 200 ms es aproximadamente 2,9 veces el p95 observado (69,07 ms), por lo que deja margen para variaciones entre ejecuciones, pero es más exigente que los 500 ms originales. El máximo observado de 332,84 ms no contradice este objetivo: un p95 no exige que todos los requests terminen antes de 200 ms. Se configura SLO_P95: 200 en ci.yml; el script lo aplica mediante p(95)<200. En el [run final ajustado](https://github.com/giano-montano/INF384-lab4-dev/actions/runs/40976952876/job/123807931713), el threshold se cumplió con p95 = 70,20 ms, 19 210 requests y 0,00 % de errores HTTP y de checks. Esto valida el objetivo en esa corrida, sin permitir inferir por sí solo el comportamiento en producción.
 
 SLA propuesto y diferencia con el SLO:
 
@@ -127,15 +127,32 @@ Cambios para cumplir el presupuesto:
 
 | Cambio | Job | Minutos recuperados |
 |---|---|---|
-| Reducir la etapa de carga constante de 10 a 5 minutos, manteniendo 30 usuarios virtuales y las rampas de 1 minuto | load | 5:00 estimados; pendiente medir la diferencia real entre jobs |
-| Ajustar SLO_P95 de 500 a 200 ms | load | 0:00 previstos; aumenta la exigencia de la validación, no es la fuente del ahorro |
+| Reducir la etapa de carga constante de 10 a 5 minutos, manteniendo 30 usuarios virtuales y las rampas de 1 minuto | load | 4:58 observados: el job pasó de 12:12 a 7:14 |
+| Ajustar SLO_P95 de 500 a 200 ms | load | 0:00 de ahorro atribuido; aumenta la exigencia de la validación, no es la fuente del ahorro |
 
-La duración inicial suma 880 s. Si los demás tiempos se mantienen, reducir la meseta en 300 s deja 580 s, es decir, 9:40. Esto daría 1:20 de margen frente al presupuesto de 11:00. La meseta conserva 5 minutos, por encima del mínimo de 4. load sigue ejecutándose en cada run de main, con su threshold de latencia y los checks funcionales; el job deploy se conserva.
+La duración inicial sumó 880 s (14:40). La estimación previa al run final fue 580 s (9:40), suponiendo constantes los demás tiempos. El total realmente observado fue 604 s (10:04): se recuperaron 276 s (4:36) en el conjunto del pipeline. load ahorró 298 s (4:58), mientras los otros jobs sumaron 22 s adicionales entre ambas ejecuciones. La variación de sus duraciones explica que el ahorro total sea menor al de load.
 
-Total resultante observado: PENDIENTE del nuevo run de main. La estimación de 9:40 no sustituye esta medición.
-Link al run en main con los cambios: PENDIENTE de commit y push por el alumno.
+La meseta conserva 5 minutos, por encima del mínimo de 4. load sigue ejecutándose en cada run de main, con su threshold de latencia y los checks funcionales; el job deploy se conserva.
 
-Al terminar ese run se sumarán nuevamente las duraciones de todos los jobs y se registrará el ahorro real de load respecto de 12:12, además del total observado y el enlace. El objetivo es total <= 11:00.
+Total resultante observado: **10:04**, menor al presupuesto de **11:00**, con **00:56 de margen**.
+Link al run en main con los cambios: https://github.com/giano-montano/INF384-lab4-dev/actions/runs/40976952876. Head SHA: 96a24461cb25687295df650ce7e8cf9f1e29cea7. Los nueve jobs concluyeron con success.
+
+El run se inició el **29/10/2026 a las 19:01:05 de Lima (UTC-5)** y terminó a las 19:10:16. GitHub registra su inicio como 30/10 a las 00:01:05 UTC; corresponde al 29/10 en la zona horaria del laboratorio.
+
+Duraciones finales, calculadas con el mismo criterio que el run de referencia:
+
+| Job | Duración final (min:seg) |
+|---|---:|
+| unit | 00:12 |
+| integration | 00:12 |
+| sast | 00:18 |
+| sca | 00:20 |
+| build-push | 00:47 |
+| deploy | 00:23 |
+| smoke | 00:14 |
+| e2e | 00:24 |
+| load | 07:14 |
+| **Total** | **10:04** |
 
 Riesgo aceptado (defecto de la aplicación concreto y efecto en la métrica DORA asignada):
 
@@ -145,7 +162,7 @@ Dirección esperada de la métrica asignada, change failure rate: sube ante ese 
 
 Decisión sobre sast (se queda / se mueve a otra etapa o evento / informativo) y razón:
 
-Se queda como validación bloqueante en pre-build, con las reglas y severidad ERROR actuales. Su job costó 18 s (0,30 minutos), aproximadamente el 2,7 % del presupuesto de 11 minutos. El ahorro estimado al acortar load permite conservarlo: la estimación de 9:40 ya incluye esos 18 s.
+Se queda como validación bloqueante en pre-build, con las reglas y severidad ERROR actuales. Su job costó 18 s (0,30 minutos) tanto en el run de referencia como en el final, aproximadamente el 2,7 % del presupuesto de 11 minutos. El ahorro al acortar load permite conservarlo: el total final medido de 10:04 ya incluye esos 18 s y cumple el presupuesto.
 
 Mantener SAST antes de build-push permite detener patrones de código inseguros antes de desplegar. Frente a eliminarlo o dejarlo como informativo, se espera reducir el riesgo de que lleguen a operación cambios que requieran una corrección urgente, contribuyendo a contener el change failure rate. Conservarlo no implica una mejora de CFR medida respecto del pipeline actual, porque su comportamiento se mantiene. Moverlo después de deploy permitiría detectar esos hallazgos más tarde; para este presupuesto, el ahorro de 18 s no justifica aceptar ese riesgo adicional.
 ## Declaración de uso de IA
